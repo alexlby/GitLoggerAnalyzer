@@ -15,9 +15,9 @@ def find_git_commit_from_mysql():
         select_story_rows = cur.fetchall()
 
         for row in select_defect_rows:
-            print 'Defect -->', row[0], '   ', row[1]
+            print 'Defect --> \t', row[0], '\t', row[1]
         for row in select_story_rows:
-            print 'Story -->', row[0], '    ', row[1]
+            print 'Story --> \t', row[0], '\t', row[1]
     finally:
         conn.commit()
         cur.close()
