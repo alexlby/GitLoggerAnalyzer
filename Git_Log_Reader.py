@@ -37,9 +37,9 @@ def convert_git_log_file_2_git_commits(file_name):
 
     git_commits = []
 
-    pattern_st = re.compile(r'[Ss][Tt]\d{3,5}')
-    pattern_ta = re.compile(r'[Tt][Aa]\d{3,5}')
-    pattern_de = re.compile(r'[Dd][Ee]\d{3,5}')
+    pattern_st = re.compile(r'[Ss][Tt]\d{3,6}')
+    pattern_ta = re.compile(r'[Tt][Aa]\d{3,6}')
+    pattern_de = re.compile(r'[Dd][Ee]\d{3,6}')
 
     with codecs.open(file_name, 'rt',  'utf-8') as file:
         all_lines = file.readlines()
@@ -104,7 +104,7 @@ def convert_git_log_file_2_git_commits(file_name):
 def insert_git_commits_2_mysql(system_name, branch_name, git_commits):
     import MySQLdb
     try:
-        #conn=MySQLdb.connect(host='localhost',user='root', passwd='adminpass',db='localtestdb',port=3306)
+
         conn = MySQLdb.connect(host='localhost', user='root', passwd='adminpass', db='pythondb', port=3306)   # in office PC, it's 'pythondb'
         cur = conn.cursor()
 
