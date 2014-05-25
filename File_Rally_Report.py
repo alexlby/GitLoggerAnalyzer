@@ -1,7 +1,7 @@
 __author__ = 'LUOAL2'
 
 
-def find_git_commit_from_mysql():
+def generate_report():
     import MySQLdb
 
     try:
@@ -99,7 +99,7 @@ def output_2_xls(file_defect_rows, file_story_rows, file_defect_count_rows, file
 
 def main():
     print ("Reporter start!")
-    find_git_commit_from_mysql()
+    generate_report()
     print ("Reporter end!")
 
 if __name__ == '__main__':

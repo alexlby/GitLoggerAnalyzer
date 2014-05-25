@@ -1,6 +1,6 @@
 __author__ = 'luobiyuan'
 
-def find_file_count_group_by_rally():
+def generate_report():
    import MySQLdb
 
    try:
@@ -113,7 +113,7 @@ def output_2_xls(defect_rows, story_rows, defect_file_count_rows, story_file_cou
 
 def main():
     print ("Reporter start!")
-    find_file_count_group_by_rally()
+    generate_report()
     print ("Reporter end!")
 
 if __name__ == '__main__':
