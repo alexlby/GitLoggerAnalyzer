@@ -27,6 +27,8 @@ def generate_report():
 
         output_2_xls(select_file_defect_row, select_file_story_row, select_file_defect_count_rows, select_file_story_count_rows)
 
+        generate_bar_chart(select_file_defect_count_rows, select_file_story_count_rows)
+
     finally:
         conn.commit()
         cur.close()
@@ -96,6 +98,20 @@ def output_2_xls(file_defect_rows, file_story_rows, file_defect_count_rows, file
     sheet_file_story_count.col(1).set_width(4000)
 
     output_workbook.save('dist/File_Rally.xls')
+
+def generate_bar_chart(select_file_defect_count_rows, select_file_story_count_rows):
+
+    import pycha
+    import pycha.bar
+    from Generate_Chart import Generate_Chart
+
+    charGen = Generate_Chart()
+    # show top 20 select_file_defect_count_rows chart
+    charGen.barChart(select_file_defect_count_rows[0:20], "dist/file_defect_count.png", "File - Related Defects Count Chart", "Related Defects Count", "File Name", pycha.bar.VerticalBarChart, "blue")
+
+    # show top 20 select_file_story_count_rows chart
+    charGen.barChart(select_file_story_count_rows[0:20], "dist/file_story_count.png", "File - Related Stories Count Chart", "Related Stories Count", "File Name", pycha.bar.VerticalBarChart, "green")
+
 
 def main():
     print ("Reporter start!")

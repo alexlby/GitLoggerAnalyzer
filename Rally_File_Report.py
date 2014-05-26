@@ -1,7 +1,11 @@
 __author__ = 'luobiyuan'
 
+
+
+
 def generate_report():
    import MySQLdb
+
 
    try:
         conn = MySQLdb.connect(host='localhost', user='root', passwd='adminpass', db='pythondb', port=3306)
@@ -39,6 +43,8 @@ def generate_report():
             print 'Story --> \t', row[0], '\t', row[1]
 
         output_2_xls(select_defect_rows, select_story_rows, select_defect_file_count_rows, select_story_file_count_rows)
+
+        generate_bar_chart(select_defect_file_count_rows, select_story_file_count_rows)
    finally:
         conn.commit()
         cur.close()
@@ -109,6 +115,18 @@ def output_2_xls(defect_rows, story_rows, defect_file_count_rows, story_file_cou
     sheet_story_file_count.col(1).set_width(4000)
 
     output_workbook.save('dist/Rally_File.xls')
+
+def generate_bar_chart(select_defect_file_count_rows, select_story_file_count_rows):
+
+    import pycha
+    import pycha.bar
+    from Generate_Chart import Generate_Chart
+
+    charGen = Generate_Chart()
+    # show top 20 defect_file_count chart
+    charGen.barChart(select_defect_file_count_rows[1:21], "dist/defect_file_count.png", "Defect - Changed File Count Chart", "Changed File Count", "Defect ID", pycha.bar.HorizontalBarChart, "blue")
+    # show top 20 story_file_count chart
+    charGen.barChart(select_story_file_count_rows[0:20], "dist/story_file_count.png", "Story - Changed File Count Chart", "Changed File Count", "Story ID", pycha.bar.HorizontalBarChart, "green")
 
 
 def main():
