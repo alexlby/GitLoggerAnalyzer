@@ -71,3 +71,34 @@ class Generate_Chart:
 
         surface.write_to_png(output)
 
+    def pieChart(self, input, output, title, charColor):
+
+        import pycha.pie
+
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 800, 800)
+
+        dataSet = [(line[0], [[0, line[1]]]) for line in input]
+
+        options = {
+            'axis': {
+                'x': {
+                    'ticks': [dict(v=i, label=d[0]) for i, d in enumerate(input)],
+                }
+            },
+            'legend': {
+                'hide': False,
+            },
+            'colorScheme': {
+                'name': 'gradient',
+                'args': {
+                    'initialColor': charColor
+                },
+            },
+            'title': title,
+        }
+        chart = pycha.pie.PieChart(surface, options)
+
+        chart.addDataset(dataSet)
+        chart.render()
+
+        surface.write_to_png(output)

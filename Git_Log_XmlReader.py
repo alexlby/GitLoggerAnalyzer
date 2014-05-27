@@ -1,8 +1,8 @@
+__author__ = 'LUOAL2'
 # -*- coding: utf-8 -*-
 
 # for below git log format:
-# git log --after={2014-04-19} --before={2014-05-18} --no-merges --name-only develop_rel_1.7.0 >> develop_rel_1_7_0.txt
-
+# git log --pretty=format:"<entry><commit_hash>%H</commit_hash><author>%an</author><commit_date>%ci</commit_date><message_body>%s</message_body></entry>" --after={2014-04-19} --before={2014-05-18} --no-merges --name-only develop_rel_1.7.0 >> develop_rel_1_7_0_xml.txt
 
 class GitCommit:
     def __init__(self, git_commit_hash, author_id, commit_date, commit_message, rally_sts, rally_tas, rally_des, changed_files):
@@ -33,12 +33,10 @@ class GitCommit:
                 print '---->', changed_files
             print '============================================'
 
-########################################################################
-
-
 def convert_git_log_file_2_git_commits(file_name):
     import codecs
     import re
+    import xml.dom.minidom
 
     git_commits = []
 
@@ -48,63 +46,61 @@ def convert_git_log_file_2_git_commits(file_name):
 
     with codecs.open(file_name, 'rt',  'utf-8') as file:
         all_lines = file.readlines()
-        for line in all_lines:
-            if "commit" in line and line.find('commit') <= 1: # filter the case of 'commit' in raw commit message
-                current_commit_line = line
+        line_index = 0
+        while (line_index < len(all_lines)):
+            if (len(all_lines[line_index].strip()) > 1):
+                if ("<entry><commit_hash>" in all_lines[line_index]):
 
-                commit_hash_line = current_commit_line.split(' ')        # e.g.: commit e53556fb6b28b9a4714886124cb4781cf0e5dae8
-                commit_hash = commit_hash_line[1].strip()                # so get item 1, its the hash id of this commit
+                    file_names = []
 
-                author_id_line = all_lines[all_lines.index(line)+1]      # go to next line
-                author_id = author_id_line.split(' ')[1].strip()
+                    # prepare the raw line
+                    data = all_lines[line_index].strip()
+                    data = data.replace(u'\u3010', '[').replace(u'\u3011', ']') #.replace("【", "[").replace("】", "]")
+                    data = data.replace("&", "&amp;").replace("\"", "&quot;")
+                    xml_dom = xml.dom.minidom.parseString(data)
 
-                commit_date_line = all_lines[all_lines.index(line)+2]
-                commit_date = commit_date_line[5:].strip()      # e.g. : Date:   Wed Dec 25 10:05:12 2013 +0800 , so need get substring [5:]
+                    commit_hash_nodes = xml_dom.getElementsByTagName("commit_hash")
+                    commit_hash = commit_hash_nodes[0].childNodes[0].nodeValue
 
-                commit_message_line = all_lines[all_lines.index(line)+4]
-                commit_message = commit_message_line.strip()
+                    author_nodes = xml_dom.getElementsByTagName("author")
+                    author = author_nodes[0].childNodes[0].nodeValue
 
-                st_ids_in_this_commit = []
-                ta_ids_in_this_commit = []
-                de_ids_in_this_commit = []
+                    commit_date_nodes = xml_dom.getElementsByTagName("commit_date")
+                    commit_date = commit_date_nodes[0].childNodes[0].nodeValue
 
-                # Start handling ST/DE/TA reg_expression matching
-                for st in pattern_st.finditer(commit_message):
-                    st_ids_in_this_commit.append(st.group())
-                for ta in pattern_ta.finditer(commit_message):
-                    ta_ids_in_this_commit.append(ta.group())
-                for de in pattern_de.finditer(commit_message):
-                    de_ids_in_this_commit.append(de.group())
+                    message_body_nodes = xml_dom.getElementsByTagName("message_body")
+                    message_body = message_body_nodes[0].childNodes[0].nodeValue
 
-                print "commit message = ",  commit_message
-                if len(st_ids_in_this_commit) == 0 and len(de_ids_in_this_commit) == 0 and len(ta_ids_in_this_commit) == 0:
-                    continue    # if no rally id, do nothing
+                    st_ids_in_this_commit = []
+                    ta_ids_in_this_commit = []
+                    de_ids_in_this_commit = []
 
-                # Start handle changed files
-                current_changed_files = []
-                start_index_of_change_files_in_this_commit_block = all_lines.index(line) + 6
-                count_of_change_files_in_this_commit_block = 0
-                line_pr = all_lines[start_index_of_change_files_in_this_commit_block]
-                while not ("commit" in line_pr and line_pr.find('commit') == 0):
-                    line_pr_index = start_index_of_change_files_in_this_commit_block + count_of_change_files_in_this_commit_block
-                    if (line_pr_index < len(all_lines)):
-                        line_pr = all_lines[line_pr_index]
-                    else:
-                        break
-                    count_of_change_files_in_this_commit_block += 1
+                    # Start handling ST/DE/TA reg_expression matching
+                    for st in pattern_st.finditer(message_body):
+                        st_ids_in_this_commit.append(st.group())
+                    for ta in pattern_ta.finditer(message_body):
+                        ta_ids_in_this_commit.append(ta.group())
+                    for de in pattern_de.finditer(message_body):
+                        de_ids_in_this_commit.append(de.group())
 
-                for currentPr in range(start_index_of_change_files_in_this_commit_block, line_pr_index - 1):
-                    current_changed_file = all_lines[currentPr].strip()
-                    current_changed_files.append(current_changed_file)
+                    if len(st_ids_in_this_commit) == 0 and len(de_ids_in_this_commit) == 0 and len(ta_ids_in_this_commit) == 0:
+                        line_index += 1
+                        continue    # if no rally id, do nothing
 
-                git_commit = GitCommit(commit_hash, author_id, commit_date, commit_message, st_ids_in_this_commit, ta_ids_in_this_commit, de_ids_in_this_commit, current_changed_files)
-                git_commit.show_self()
-                git_commits.append(git_commit)
-            file.close()
+                    line_index += 1
+                    while (line_index < len(all_lines) and len(all_lines[line_index]) > 1):
+                        file_names.append(all_lines[line_index].strip())
+                        line_index += 1
+
+
+                    git_commit = GitCommit(commit_hash, author, commit_date, message_body, st_ids_in_this_commit, ta_ids_in_this_commit, de_ids_in_this_commit, file_names)
+                    git_commit.show_self()
+                    git_commits.append(git_commit)
+                line_index += 1
+            else:
+                line_index += 1
+    file.close()
     return git_commits
-
-######################################################################
-
 
 def insert_git_commits_2_mysql(system_name, branch_name, git_commits):
     import MySQLdb
@@ -157,16 +153,12 @@ def insert_git_commits_2_mysql(system_name, branch_name, git_commits):
         cur.close()
         conn.close()
 
-########################################################################
-
-
 def main():
     print ("reader start!")
-    file_name = "Resources/develop_rel_1_7_0.txt"
+    file_name = "Resources/develop_rel_1_7_0_xml.txt"
     git_commits = convert_git_log_file_2_git_commits(file_name)
     insert_git_commits_2_mysql('SPS', 'develop_rel_1.7.0', git_commits)
     print ("reader end!")
 
 if __name__=='__main__':
     main()
-
