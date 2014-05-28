@@ -57,6 +57,7 @@ def convert_git_log_file_2_git_commits(file_name):
                     data = all_lines[line_index].strip()
                     data = data.replace(u'\u3010', '[').replace(u'\u3011', ']') #.replace("【", "[").replace("】", "]")
                     data = data.replace("&", "&amp;").replace("\"", "&quot;")
+                    print "current line = ", data
                     xml_dom = xml.dom.minidom.parseString(data)
 
                     commit_hash_nodes = xml_dom.getElementsByTagName("commit_hash")
@@ -153,12 +154,14 @@ def insert_git_commits_2_mysql(system_name, branch_name, git_commits):
         cur.close()
         conn.close()
 
-def main():
+def main(argv):
     print ("reader start!")
-    file_name = "Resources/develop_rel_1_7_0_xml.txt"
+    # file_name = "Resources/develop_rel_1_7_0_xml.txt"
+    file_name = argv[-1]
     git_commits = convert_git_log_file_2_git_commits(file_name)
     insert_git_commits_2_mysql('SPS', 'develop_rel_1.7.0', git_commits)
     print ("reader end!")
 
 if __name__=='__main__':
-    main()
+    import sys
+    main(sys.argv)
