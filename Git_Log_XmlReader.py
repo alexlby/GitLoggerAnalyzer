@@ -158,7 +158,7 @@ def main(argv):
     print ("reader start!")
     # file_name = "Resources/develop_rel_1_7_0_xml.txt"
     file_name = argv[-1]
-    git_commits = convert_git_log_file_2_git_commits(file_name)
+    git_commits = convert_git_log_file_2_git_commits("./Resources/develop_rel_1_7_0_xml.txt")
     insert_git_commits_2_mysql('SPS', 'develop_rel_1.7.0', git_commits)
     print ("reader end!")
 
