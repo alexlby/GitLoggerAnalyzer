@@ -140,3 +140,23 @@ def search_count_of_file_by_rally_number(project_name, branch_name, rally_type):
     #     print row[0], "\t", row[1]
 
     return select_file_rally_count_rows
+
+
+def template(project_name, branch_name, rally_type):
+    template_return = []
+    try:
+        c_db_wrapper = connect(DB_ARG_HOST, DB_ARG_PORT, DB_ARG_INSTANCE, DB_ARG_USER, DB_ARG_PASSWORD)
+
+        args = []
+        args.append(rally_type)
+        args.append(project_name)
+        args.append(branch_name)
+        c_db_wrapper.cur.execute('''template_sql''', args)
+        template_return = c_db_wrapper.cur.fetchall()
+    finally:
+        commit_and_close(c_db_wrapper)
+
+    for row in template_return:
+        print row[0], '\t', row[1]
+
+    return template_return
