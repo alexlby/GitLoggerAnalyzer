@@ -15,7 +15,6 @@ class database_wrapper:
         self.cur = cur
 
 def connect(arg_host, arg_port, arg_instance, arg_user, arg_password):
-    print arg_host, "|", arg_port, "|", arg_instance, "|", arg_user, "|", arg_password, "|"
     conn = MySQLdb.connect(host=arg_host, user=arg_user, passwd=arg_password, db=arg_instance, port=arg_port)
     cur = conn.cursor()
     db_wrapper = database_wrapper(conn, cur)
@@ -137,7 +136,7 @@ def search_count_of_file_by_rally_number(project_name, branch_name, rally_type):
     finally:
         commit_and_close(c_db_wrapper)
 
-    for row in select_file_rally_count_rows:
-        print row[0], "\t", row[1]
+    # for row in select_file_rally_count_rows:
+    #     print row[0], "\t", row[1]
 
     return select_file_rally_count_rows
