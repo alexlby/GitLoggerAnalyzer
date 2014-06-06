@@ -35,7 +35,16 @@ def search_file_rally_mapping(project_name, branch_name, rally_type):
         args.append(rally_type)
         args.append(project_name)
         args.append(branch_name)
-        c_db_wrapper.cur.execute('select src.SRC_FILE_NAME, rally.RALLY_UNIT_NUMBER from rally_unit rally, src_file src where src.GIT_COMMIT_ID = rally.GIT_COMMIT_ID and rally.RALLY_UNIT_TYPE = %s and exists (select * from GIT_COMMIT git where git.GIT_COMMIT_ID = src.GIT_COMMIT_ID and git.GIT_COMMIT_SYSTEM_NAME = %s and git.GIT_COMMIT_BRANCH_NAME = %s) order by src.SRC_FILE_NAME desc', args)
+        c_db_wrapper.cur.execute('''select src.SRC_FILE_NAME, rally.RALLY_UNIT_NUMBER
+                                    from rally_unit rally, src_file src
+                                    where src.GIT_COMMIT_ID = rally.GIT_COMMIT_ID
+                                        and rally.RALLY_UNIT_TYPE = %s
+                                        and exists (select *
+                                                    from GIT_COMMIT git
+                                                    where git.GIT_COMMIT_ID = src.GIT_COMMIT_ID
+                                                    and git.GIT_COMMIT_SYSTEM_NAME = %s
+                                                    and git.GIT_COMMIT_BRANCH_NAME = %s)
+                                    order by src.SRC_FILE_NAME desc''', args)
         select_file_rally_row = c_db_wrapper.cur.fetchall()
 
     finally:
@@ -55,7 +64,17 @@ def search_count_of_rally_by_file_names(project_name, branch_name, rally_type):
         args.append(rally_type)
         args.append(project_name)
         args.append(branch_name)
-        c_db_wrapper.cur.execute('select src.SRC_FILE_NAME, count(distinct(rally.RALLY_UNIT_ID)) as rally_count from rally_unit rally, src_file src where src.GIT_COMMIT_ID = rally.GIT_COMMIT_ID and rally.RALLY_UNIT_TYPE = %s and exists (select * from GIT_COMMIT git where git.GIT_COMMIT_ID = src.GIT_COMMIT_ID and git.GIT_COMMIT_SYSTEM_NAME = %s and git.GIT_COMMIT_BRANCH_NAME = %s) group by src.SRC_FILE_NAME order by rally_count desc', args)
+        c_db_wrapper.cur.execute('''select src.SRC_FILE_NAME, count(distinct(rally.RALLY_UNIT_ID)) as rally_count
+                                    from rally_unit rally, src_file src
+                                    where src.GIT_COMMIT_ID = rally.GIT_COMMIT_ID
+                                    and rally.RALLY_UNIT_TYPE = %s
+                                    and exists (select *
+                                                from GIT_COMMIT git
+                                                where git.GIT_COMMIT_ID = src.GIT_COMMIT_ID
+                                                and git.GIT_COMMIT_SYSTEM_NAME = %s
+                                                and git.GIT_COMMIT_BRANCH_NAME = %s)
+                                    group by src.SRC_FILE_NAME
+                                    order by rally_count desc''', args)
         select_file_rally_count_rows = c_db_wrapper.cur.fetchall()
     finally:
         commit_and_close(c_db_wrapper)
@@ -74,7 +93,16 @@ def searhc_rally_file_mapping(project_name, branch_name, rally_type):
         args.append(rally_type)
         args.append(project_name)
         args.append(branch_name)
-        c_db_wrapper.cur.execute('select rally.RALLY_UNIT_NUMBER, src.SRC_FILE_NAME from rally_unit rally, src_file src where src.GIT_COMMIT_ID = rally.GIT_COMMIT_ID and rally.RALLY_UNIT_TYPE = %s and exists (select * from GIT_COMMIT git where git.GIT_COMMIT_ID = src.GIT_COMMIT_ID and git.GIT_COMMIT_SYSTEM_NAME = %s and git.GIT_COMMIT_BRANCH_NAME = %s) order by rally.RALLY_UNIT_NUMBER desc', args)
+        c_db_wrapper.cur.execute('''select rally.RALLY_UNIT_NUMBER, src.SRC_FILE_NAME
+                                    from rally_unit rally, src_file src
+                                    where src.GIT_COMMIT_ID = rally.GIT_COMMIT_ID
+                                    and rally.RALLY_UNIT_TYPE = %s
+                                    and exists (select *
+                                                from GIT_COMMIT git
+                                                where git.GIT_COMMIT_ID = src.GIT_COMMIT_ID
+                                                and git.GIT_COMMIT_SYSTEM_NAME = %s
+                                                and git.GIT_COMMIT_BRANCH_NAME = %s)
+                                    order by rally.RALLY_UNIT_NUMBER desc''', args)
         select_rally_file_row = c_db_wrapper.cur.fetchall()
 
     finally:
@@ -94,7 +122,17 @@ def search_count_of_file_by_rally_number(project_name, branch_name, rally_type):
         args.append(rally_type)
         args.append(project_name)
         args.append(branch_name)
-        c_db_wrapper.cur.execute('select rally.RALLY_UNIT_NUMBER, count(distinct(src.SRC_FILE_ID)) as count_src from rally_unit rally, src_file src where src.GIT_COMMIT_ID = rally.GIT_COMMIT_ID and rally.RALLY_UNIT_TYPE = %s and exists (select * from GIT_COMMIT git where git.GIT_COMMIT_ID = src.GIT_COMMIT_ID and git.GIT_COMMIT_SYSTEM_NAME = %s and git.GIT_COMMIT_BRANCH_NAME = %s) group by rally.RALLY_UNIT_NUMBER order by count_src desc', args)
+        c_db_wrapper.cur.execute('''select rally.RALLY_UNIT_NUMBER, count(distinct(src.SRC_FILE_ID)) as count_src
+                                    from rally_unit rally, src_file src
+                                    where src.GIT_COMMIT_ID = rally.GIT_COMMIT_ID
+                                    and rally.RALLY_UNIT_TYPE = %s
+                                    and exists (select *
+                                                from GIT_COMMIT git
+                                                where git.GIT_COMMIT_ID = src.GIT_COMMIT_ID
+                                                and git.GIT_COMMIT_SYSTEM_NAME = %s
+                                                and git.GIT_COMMIT_BRANCH_NAME = %s)
+                                    group by rally.RALLY_UNIT_NUMBER
+                                    order by count_src desc''', args)
         select_file_rally_count_rows = c_db_wrapper.cur.fetchall()
     finally:
         commit_and_close(c_db_wrapper)
